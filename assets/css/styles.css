@@ -1,10 +1,24 @@
+*, *::after, *::before {
+    box-sizing: border-box;
+}
+
+:root {
+    --button-color: purple;
+    --button-clicked-color: plum;
+}
+
 header {
     display: flex;
     justify-content: space-between;
 }
 
-
 main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#content {
     display: flex;
     flex-direction: column;
     align-items: center;

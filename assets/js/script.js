@@ -1,14 +1,9 @@
-// Selecting elements from HTML by ID
-var startEl = document.getElementById("start");
-var highscoreEl = document.getElementById("highscore");
-var timerEl = document.getElementById("timer");
-var quizEl = document.getElementById("quiz");
+var content = document.getElementById('content');
+var startBtn = document.getElementById('start-btn');
+var highScoreBtn = document.getElementById('high-score-btn');
+var timerEl = document.getElementById('timer');
 
-// FIXME: Set timer to 75 seconds
-var timer = 3;
-var score = 0;
-
-// Array of questions
+// Questions array
 var questions = [{
     question: "Common data types in JavaScript DO NOT include:",
     choices: ["Strings", "Booleans", "Alerts", "Numbers"],
@@ -36,63 +31,158 @@ var questions = [{
 }
 ];
 
-// Event listener for start button
-startEl.addEventListener("click", function () {
-    // Set timerEl to timer when start button is clicked
-    timerEl.textContent = timer;
-    // Hide quizMenuEl when start button is clicked
-    quizEl.innerHTML = "";
-    // Call startGame function when start button is clicked
-    startGame();
+// Test high score array 
+var highScoresArray = [{
+    initials: 'JM',
+    score: 100,
+}];
 
-    
+// Display Quiz Menu on window load
+window.onload = function() {
+    displayQuizMenu();
+    console.log('window loaded');
+}
+
+// Function that displays the quiz menu
+function displayQuizMenu () {
+    content.innerHTML = '';
+
+    timerEl.textContent = 0;
+
+    var titleEl = document.createElement('h1');
+    titleEl.textContent = 'JavaScript Quiz';
+    content.appendChild(titleEl);
+
+    var instructionsEl = document.createElement('p');
+    instructionsEl.textContent = 'Try to answer the following code-related questions within the time limit.\n Keep in mind that incorrect answers will penalize your score/time by ten seconds!';
+    content.appendChild(instructionsEl);
+
+    var startBtn = document.createElement('button');
+    startBtn.textContent = 'Start Quiz';
+    content.appendChild(startBtn);
+
+    // Event listener for start button
+    startBtn.addEventListener('click', function () {
+        startQuiz()
+    });
+}
+
+// Function that displays the high score w/ event listener that goes back to quiz menu
+function displayHighScore() {
+    console.log('display high score');
+    var highScores = document.createElement('h1');
+    highScores.textContent = 'High Scores';
+    content.appendChild(highScores);
+
+    for (var i = 0; i < highScoresArray.length; i++) {
+        var highScore = document.createElement('p');
+        highScore.textContent = (i + 1) +". " + highScoresArray[i].initials + ' - ' + highScoresArray[i].score;
+        content.appendChild(highScore);
+    }
+
+    var goBackBtn = document.createElement('button');
+    goBackBtn.textContent = 'Go Back';
+    content.appendChild(goBackBtn);
+
+    var clearHighScoreBtn = document.createElement('button');
+    clearHighScoreBtn.textContent = 'Clear High Scores';
+    content.appendChild(clearHighScoreBtn);
+
+    goBackBtn.addEventListener('click', function() {
+        displayQuizMenu();
+    })
+
+    clearHighScoreBtn.addEventListener('click', function() {
+        highScoresArray = [];
+        content.innerHTML = '';
+        displayHighScore();
+    })
+}
+// Event listener for high score button
+highScoreBtn.addEventListener('click', function() {
+    content.innerHTML = '';
+    displayHighScore();
 });
 
-// Start game function
-function startGame() {
-    quizFunction();
-    // Decrement timer by 1 every second
-    setInterval(function () {
-        timerEl.textContent--;
+// Start Quiz
+function startQuiz() {
+    // Clear content and set timer to 75 seconds
+    content.innerHTML = '';
+    console.log('start quiz');
+    // TODO: Set timer to 75 seconds
+    timerEl.textContent = 3;
 
-        // If timer is 0, end game
+    // Start timer
+    var timerInterval = setInterval(function() {
+        timerEl.textContent--;
         if (timerEl.textContent == 0) {
-            clearInterval(timerEl.textContent);
-            endGame();
+            clearInterval(timerInterval);
+            // End Quiz
+            endQuiz();
         }
     }, 1000);
 
-    // Loop through questions array
+
+
+//     // Start timer
+//     var timerInterval = setInterval(function() {
+//         timerEl.textContent--;
+//         if (timerEl.textContent == 0) {
+//             clearInterval(timerInterval);
+//             // End Quiz
+//             endQuiz();
+//         }
+//     }
 
 
 }
 
-// Quiz function
-function quizFunction() {
-    // Append question to quiz
-    // Create h1 element named questionEl
-    var questionEl = document.createElement("h1");
-    // Set questionEl text content to first question in questions array
-    questionEl.textContent = questions[0].question;
-    // Append questionEl to quizEl
-    quizEl.appendChild(questionEl);
+// // Start Quiz
+// startBtn.addEventListener('click', function() {
+//     // Hide Quiz Menu
+//     content.innerHTML = '';
+//     // Set timer to 75 seconds
+//     timerEl.textContent = 3;
+//     // Start timer
+//     var timerInterval = setInterval(function() {
+//         timerEl.textContent--;
+//         if (timerEl.textContent == 0) {
+//             clearInterval(timerInterval);
+//             // End Quiz
+//             endQuiz();
+//         }
+//     }, 1000);
 
-    // Append choices to quiz
-    // Create ul element named choicesEl
-    var choiceEl = document.createElement("ul");
-    for (var i = 0; i < questions[0].choices.length; i++) {
-        console.log(questions[0].choices[i])
-        // Create li element named choiceEl
-        var choiceEl = document.createElement("button");
+// });
 
-        // Set choiceEl text content to first choice in questions array
-        choiceEl.textContent = questions[0].choices[i];
-        // Append choiceEl to choicesEl
-        quizEl.appendChild(choiceEl);
-    }
-}
 
-// End game function
-function endGame() {
-    timerEl.textContent = 0;
+// End Quiz
+function endQuiz() {
+    var endQuizTitleEl = document.createElement('h1');
+    endQuizTitleEl.textContent = 'All done!';
+    content.appendChild(endQuizTitleEl);
+
+    score = timerEl.textContent;
+
+    var endQuizScoreEl = document.createElement('p');
+    endQuizScoreEl.textContent = 'Your final score is ' + score;
+    content.appendChild(endQuizScoreEl);
+
+    var initialsEl = document.createElement('input');
+    initialsEl.setAttribute('type', 'text');
+    initialsEl.setAttribute('placeholder', 'Enter initials');
+    content.appendChild(initialsEl);
+
+    var submitBtn = document.createElement('button');
+    submitBtn.textContent = 'Submit';
+    content.appendChild(submitBtn);
+
+    submitBtn.addEventListener('click', function() {
+        highScoresArray.push({initials: initialsEl.value, score: endQuizScoreEl.textContent});
+        console.log(highScoresArray)
+    })
+
+    console.log('end quiz');
+    
+
 }

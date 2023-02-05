@@ -5,8 +5,21 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JavaScript Quiz</title>
+    <link rel="stylesheet" href="./assets/css/styles.css">
 </head>
 <body>
-    <button>View High Scores</button>
+    <header>
+        <button id="highscore">View High Scores</button>
+        <p>Time Left: <span id="timer"></span></p>
+    </header>
+
+    <main>
+        <div id="quiz">
+            <h1>JavaScript Quiz</h1>
+            <p>Try to answer the following code-related questions within the time limit.<br>Keep in mind that incorrect answers will penalize your time by ten seconds!</p>
+            <button id="start">Start Quiz</button>
+        </div>
+    </main>
+    <script src= "./assets/js/script.js"></script>
 </body>
 </html>

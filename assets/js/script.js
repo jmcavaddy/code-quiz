@@ -3,6 +3,9 @@ var startBtn = document.getElementById('start-btn');
 var highScoreBtn = document.getElementById('high-score-btn');
 var timerEl = document.getElementById('timer');
 
+var questionIndex = 0;
+var timer = 0;
+
 // Questions array
 var questions = [{
     question: "Common data types in JavaScript DO NOT include:",
@@ -32,10 +35,7 @@ var questions = [{
 ];
 
 // Test high score array 
-var highScoresArray = [{
-    initials: 'JM',
-    score: 100,
-}];
+var highScoresArray = [];
 
 // Display Quiz Menu on window load
 window.onload = function() {
@@ -43,11 +43,13 @@ window.onload = function() {
     console.log('window loaded');
 }
 
-// Function that displays the quiz menu
+// Function that displays the quiz menu 
+// w/ event listener that starts the quiz
 function displayQuizMenu () {
     content.innerHTML = '';
 
-    timerEl.textContent = 0;
+    timer = 0;
+    timerEl.textContent = timer;
 
     var titleEl = document.createElement('h1');
     titleEl.textContent = 'JavaScript Quiz';
@@ -67,7 +69,14 @@ function displayQuizMenu () {
     });
 }
 
-// Function that displays the high score w/ event listener that goes back to quiz menu
+// Event listener for high score button
+highScoreBtn.addEventListener('click', function() {
+    content.innerHTML = '';
+    displayHighScore();
+});
+
+// Function that displays the high score 
+// w/ event listener that goes back to quiz menu
 function displayHighScore() {
     console.log('display high score');
     var highScores = document.createElement('h1');
@@ -88,21 +97,18 @@ function displayHighScore() {
     clearHighScoreBtn.textContent = 'Clear High Scores';
     content.appendChild(clearHighScoreBtn);
 
+    // Event listener to go back to quiz menu from high scores
     goBackBtn.addEventListener('click', function() {
         displayQuizMenu();
     })
 
+    // Event listener to clear high scores list
     clearHighScoreBtn.addEventListener('click', function() {
         highScoresArray = [];
         content.innerHTML = '';
         displayHighScore();
     })
 }
-// Event listener for high score button
-highScoreBtn.addEventListener('click', function() {
-    content.innerHTML = '';
-    displayHighScore();
-});
 
 // Start Quiz
 function startQuiz() {
@@ -110,57 +116,79 @@ function startQuiz() {
     content.innerHTML = '';
     console.log('start quiz');
     // TODO: Set timer to 75 seconds
-    timerEl.textContent = 3;
+    timer = 75;
+    timerEl.textContent = timer;
+    // Call function that handles displaying questions
+    displayQuestions(questionIndex);
 
-    // Start timer
+    // Start timer, decrement timer by 1 every second, and end quiz when timer reaches 0
     var timerInterval = setInterval(function() {
-        timerEl.textContent--;
-        if (timerEl.textContent == 0) {
+        
+        timer--;
+        timerEl.textContent = timer;
+        if (timer <= 0 || questionIndex === questions.length) {
             clearInterval(timerInterval);
             // End Quiz
+            console.log('u ran out of time')
             endQuiz();
+
         }
     }, 1000);
-
-
-
-//     // Start timer
-//     var timerInterval = setInterval(function() {
-//         timerEl.textContent--;
-//         if (timerEl.textContent == 0) {
-//             clearInterval(timerInterval);
-//             // End Quiz
-//             endQuiz();
-//         }
-//     }
-
-
+    
 }
 
-// // Start Quiz
-// startBtn.addEventListener('click', function() {
-//     // Hide Quiz Menu
-//     content.innerHTML = '';
-//     // Set timer to 75 seconds
-//     timerEl.textContent = 3;
-//     // Start timer
-//     var timerInterval = setInterval(function() {
-//         timerEl.textContent--;
-//         if (timerEl.textContent == 0) {
-//             clearInterval(timerInterval);
-//             // End Quiz
-//             endQuiz();
-//         }
-//     }, 1000);
+// Display Questions
+function displayQuestions() {
+    console.log(questionIndex)
+    if (questionIndex < questions.length) {
+        var questionEl = document.createElement('h1');
+        questionEl.textContent = questions[questionIndex].question;
+        content.appendChild(questionEl);
 
-// });
+        for (var i = 0; i < questions[questionIndex].choices.length; i++) {
+            var choicesEl = document.createElement('button');
+            choicesEl.textContent = questions[questionIndex].choices[i];
+            content.appendChild(choicesEl);
 
+            // Event listener for choices
+            choicesEl.addEventListener('click', function() {
+                checkAnswer(this.textContent);
+            })
+        }
+    }
+};
+
+// Check Answer
+function checkAnswer(choice) {
+    console.log(choice);
+    if (choice === questions[questionIndex].answer) {
+        console.log('correct');
+        questionIndex++;
+        content.innerHTML = '';
+        displayQuestions();
+        if (questionIndex === questions.length) {
+            endQuiz();
+        }
+    } else {
+        console.log('wrong');
+        timerEl.textContent -= 10;
+        questionIndex++;
+        content.innerHTML = '';
+        displayQuestions();
+        if (questionIndex === questions.length) {
+            endQuiz();
+        }
+    }
+}
 
 // End Quiz
 function endQuiz() {
+    content.innerHTML = '';
+
     var endQuizTitleEl = document.createElement('h1');
     endQuizTitleEl.textContent = 'All done!';
     content.appendChild(endQuizTitleEl);
+
 
     score = timerEl.textContent;
 
@@ -178,8 +206,11 @@ function endQuiz() {
     content.appendChild(submitBtn);
 
     submitBtn.addEventListener('click', function() {
-        highScoresArray.push({initials: initialsEl.value, score: endQuizScoreEl.textContent});
+        highScoresArray.push({initials: initialsEl.value, score: score});
         console.log(highScoresArray)
+        content.innerHTML = '';
+        questionIndex = 0;
+        displayHighScore();
     })
 
     console.log('end quiz');

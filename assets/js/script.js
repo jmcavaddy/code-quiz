@@ -1,12 +1,13 @@
-var content = document.getElementById('content');
-var startBtn = document.getElementById('start-btn');
+var content = document.querySelector('#content');
 var highScoreBtn = document.getElementById('high-score-btn');
 var timerEl = document.getElementById('timer');
 
+
 var questionIndex = 0;
 var timer = 0;
+var isEndGame = false;
 
-// Questions array
+// Questions array; gets called by displayQuestions function
 var questions = [{
     question: "Common data types in JavaScript DO NOT include:",
     choices: ["Strings", "Booleans", "Alerts", "Numbers"],
@@ -34,21 +35,26 @@ var questions = [{
 }
 ];
 
-// Test high score array 
+// High score array 
 var highScoresArray = [];
 
-// Display Quiz Menu on window load
-window.onload = function() {
-    displayQuizMenu();
-    console.log('window loaded');
-}
+// Event listener for high score button
+highScoreBtn.addEventListener('click', function() {
+    // FIXME Is there any reason to clear the content here vs at the top of displayHighScore?
+    content.innerHTML = ''; 
+    displayHighScore();
+});
 
 // Function that displays the quiz menu 
 // w/ event listener that starts the quiz
 function displayQuizMenu () {
-    content.innerHTML = '';
+    var startBtn = document.getElementById('start-btn');
 
-    timer = 0;
+    content.innerHTML = '';
+    isEndGame = true;
+
+    // Set timer to 75 seconds
+    timer = 75;
     timerEl.textContent = timer;
 
     var titleEl = document.createElement('h1');
@@ -56,7 +62,7 @@ function displayQuizMenu () {
     content.appendChild(titleEl);
 
     var instructionsEl = document.createElement('p');
-    instructionsEl.textContent = 'Try to answer the following code-related questions within the time limit.\n Keep in mind that incorrect answers will penalize your score/time by ten seconds!';
+    instructionsEl.textContent = 'Try to answer the following code-related questions within the time limit. Keep in mind that incorrect answers will penalize your score/time by ten seconds!';
     content.appendChild(instructionsEl);
 
     var startBtn = document.createElement('button');
@@ -64,43 +70,48 @@ function displayQuizMenu () {
     content.appendChild(startBtn);
 
     // Event listener for start button
-    startBtn.addEventListener('click', function () {
-        startQuiz()
-    });
+    startBtn.addEventListener('click', function() {startQuiz()});
 }
 
-// Event listener for high score button
-highScoreBtn.addEventListener('click', function() {
-    content.innerHTML = '';
-    displayHighScore();
-});
+
 
 // Function that displays the high score 
 // w/ event listener that goes back to quiz menu
 function displayHighScore() {
+
+    isEndGame = true;
+    // clearInterval(timerInterval);
+
     console.log('display high score');
     var highScores = document.createElement('h1');
     highScores.textContent = 'High Scores';
     content.appendChild(highScores);
-
+    
+    // Sort high scores array by score
+    highScoresArray.sort((a, b) => {return b.score - a.score});
+    
+    // Display high score leaderboard
     for (var i = 0; i < highScoresArray.length; i++) {
         var highScore = document.createElement('p');
         highScore.textContent = (i + 1) +". " + highScoresArray[i].initials + ' - ' + highScoresArray[i].score;
         content.appendChild(highScore);
     }
 
+    // Create and style go back button
     var goBackBtn = document.createElement('button');
     goBackBtn.textContent = 'Go Back';
+    goBackBtn.setAttribute("style", "margin-bottom: 10px; background-color:plum; border-radius: 5px; ")
     content.appendChild(goBackBtn);
-
-    var clearHighScoreBtn = document.createElement('button');
-    clearHighScoreBtn.textContent = 'Clear High Scores';
-    content.appendChild(clearHighScoreBtn);
 
     // Event listener to go back to quiz menu from high scores
     goBackBtn.addEventListener('click', function() {
         displayQuizMenu();
     })
+
+    var clearHighScoreBtn = document.createElement('button');
+    clearHighScoreBtn.textContent = 'Clear High Scores';
+    clearHighScoreBtn.setAttribute("style", "background-color:red; border-radius: 5px ")
+    content.appendChild(clearHighScoreBtn);
 
     // Event listener to clear high scores list
     clearHighScoreBtn.addEventListener('click', function() {
@@ -114,48 +125,53 @@ function displayHighScore() {
 function startQuiz() {
     // Clear content and set timer to 75 seconds
     content.innerHTML = '';
-    console.log('start quiz');
-    // TODO: Set timer to 75 seconds
     timer = 75;
     timerEl.textContent = timer;
+    isEndGame = false;
+
     // Call function that handles displaying questions
-    displayQuestions(questionIndex);
+    displayQuestions();
 
     // Start timer, decrement timer by 1 every second, and end quiz when timer reaches 0
     var timerInterval = setInterval(function() {
+        console.log("timer started")
         
-        timer--;
-        timerEl.textContent = timer;
         if (timer <= 0 || questionIndex === questions.length) {
             clearInterval(timerInterval);
             // End Quiz
-            console.log('u ran out of time')
             endQuiz();
-
+        } else if (isEndGame) {
+            clearInterval(timerInterval);
         }
+        if (!isEndGame) {
+            timer--; 
+            timerEl.textContent = timer;
+        }
+        
     }, 1000);
     
 }
 
 // Display Questions
 function displayQuestions() {
-    console.log(questionIndex)
-    if (questionIndex < questions.length) {
+        // Creates question as a h1 element and appends to content
         var questionEl = document.createElement('h1');
         questionEl.textContent = questions[questionIndex].question;
         content.appendChild(questionEl);
 
+        // Displays choices for each question
         for (var i = 0; i < questions[questionIndex].choices.length; i++) {
             var choicesEl = document.createElement('button');
             choicesEl.textContent = questions[questionIndex].choices[i];
+            choicesEl.setAttribute("style", "margin-bottom: 10px; background-color:purple; border-radius: 5px; color: white;")
             content.appendChild(choicesEl);
 
             // Event listener for choices
             choicesEl.addEventListener('click', function() {
+                // Calls checkAnswer function with text content of button clicked
                 checkAnswer(this.textContent);
             })
         }
-    }
 };
 
 // Check Answer
@@ -165,32 +181,28 @@ function checkAnswer(choice) {
         console.log('correct');
         questionIndex++;
         content.innerHTML = '';
-        displayQuestions();
-        if (questionIndex === questions.length) {
-            endQuiz();
-        }
+        (questionIndex == questions.length) ? endQuiz() : displayQuestions();
     } else {
         console.log('wrong');
-        timerEl.textContent -= 10;
+        timer -= 10;        
         questionIndex++;
         content.innerHTML = '';
-        displayQuestions();
-        if (questionIndex === questions.length) {
-            endQuiz();
-        }
+        (questionIndex == questions.length) ? endQuiz() : displayQuestions();
     }
 }
 
 // End Quiz
 function endQuiz() {
+    isEndGame = true;
+
     content.innerHTML = '';
+
+    score = timer;
+    timerEl.textContent = score;
 
     var endQuizTitleEl = document.createElement('h1');
     endQuizTitleEl.textContent = 'All done!';
     content.appendChild(endQuizTitleEl);
-
-
-    score = timerEl.textContent;
 
     var endQuizScoreEl = document.createElement('p');
     endQuizScoreEl.textContent = 'Your final score is ' + score;
@@ -205,6 +217,8 @@ function endQuiz() {
     submitBtn.textContent = 'Submit';
     content.appendChild(submitBtn);
 
+    
+
     submitBtn.addEventListener('click', function() {
         highScoresArray.push({initials: initialsEl.value, score: score});
         console.log(highScoresArray)
@@ -217,3 +231,7 @@ function endQuiz() {
     
 
 }
+
+// Calling the function that displays the quiz menu on page load
+
+displayQuizMenu();

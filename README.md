@@ -20,4 +20,4 @@ THEN I can save my initials and score
 ![Preview of code quiz](assets/code-quiz-preview.png)
 
 ## Location of Deployed Application
-Test your JavaScript knowledge [here]()!
+Test your JavaScript knowledge [here](https://jmcavaddy.github.io/code-quiz/)!
